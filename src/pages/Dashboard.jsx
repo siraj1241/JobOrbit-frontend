@@ -1,0 +1,13 @@
+import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
+import { api, demoJobs } from '../lib/api'
+import { useAuth } from '../lib/auth'
+import { ArrowRight, BriefcaseBusiness, CheckCircle2, Clock3, Eye, Search } from 'lucide-react'
+
+export default function Dashboard() {
+  const { user } = useAuth(), location = useLocation()
+  const [applications, setApplications] = useState([]), [notice, setNotice] = useState('')
+  useEffect(() => { api('/applications/mine').then(setApplications).catch(() => setApplications([{ id: 1, job: demoJobs[1], status: 'Interview', appliedAt: new Date().toISOString() }, { id: 2, job: demoJobs[0], status: 'Applied', appliedAt: new Date(Date.now()-86400000*3).toISOString() }])) }, [])
+  useEffect(() => { if (!location.state?.applyTo) return; const job = location.state.applyTo; api(`/jobs/${job.id}/apply`, { method: 'POST', body: '{}' }).then(x => setApplications(a => [x, ...a])).catch(() => setApplications(a => [{ id: Date.now(), job, status: 'Applied', appliedAt: new Date().toISOString() }, ...a])); setNotice(`Application started for ${job.title}`) }, [location.state])
+  return <section className="dashboard"><div className="container"><div className="dash-welcome"><div><p className="kicker">Your workspace</p><h1>Good morning, {user.name?.split(' ')[0]}.</h1><p>Keep your search focused and your next steps clear.</p></div><button className="button"><Search/> Find more jobs</button></div>{notice && <div className="notice"><CheckCircle2/> {notice}</div>}<div className="dash-stats"><article><BriefcaseBusiness/><span><strong>{applications.length}</strong>Active applications</span></article><article><Eye/><span><strong>14</strong>Profile views</span></article><article><Clock3/><span><strong>3</strong>Saved roles</span></article></div><div className="application-panel"><div className="panel-heading"><div><h2>Your applications</h2><p>Everything you’ve applied for, in one place.</p></div><button>View all <ArrowRight/></button></div><div className="application-table"><div className="table-row table-head"><span>Role</span><span>Applied</span><span>Status</span><span></span></div>{applications.map(app => <div className="table-row" key={app.id}><span className="application-role"><i style={{ background: app.job?.color }}>{app.job?.initials}</i><span><strong>{app.job?.title}</strong><small>{app.job?.company} · {app.job?.location}</small></span></span><span>{new Date(app.appliedAt).toLocaleDateString()}</span><span><b className={`status ${app.status?.toLowerCase()}`}>{app.status}</b></span><button>Open <ArrowRight/></button></div>)}</div></div></div></section>
+}
