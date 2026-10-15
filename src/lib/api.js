@@ -1,33 +1,143 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5118/api'
+/**
+ * Centralized HTTP client for the JobOrbit backend.
+ *
+ * Single source of truth for:
+ *   1. Base URL          — read from VITE_API_URL env (with sane default).
+ *   2. Auth header       — attaches Bearer token from localStorage on every request.
+ *   3. Error normalizer  — turns backend ProblemDetails / network errors into ApiError.
+ *   4. JSON parsing      — automatic Content-Type + body handling.
+ *
+ * Usage (any service module):
+ *   import { api } from '@/lib/api';
+ *   const user = await api.get('/account/me');
+ *   const res  = await api.post('/account/login', { email, password });
+ */
 
-export async function api(path, options = {}) {
-  const token = localStorage.getItem('jobboard_token')
-  const response = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-  })
-  const body = await response.json().catch(() => ({}))
-  if (!response.ok) throw new Error(body.message || 'Something went wrong')
-  return body
+const TOKEN_KEY = 'jobboard_token';
+
+/** Returns the JWT stored at login, or null if not signed in. */
+export function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
 }
 
-export const demoJobs = [
-  { id: 1, title: 'Senior Product Designer', company: 'Northstar Labs', location: 'London, UK', type: 'Full time', mode: 'Hybrid', salary: '$95k–$120k', category: 'Design', initials: 'NL', color: '#dff4ef', posted: '2 days ago', description: 'Shape calm, human product experiences for teams around the world.' },
-  { id: 2, title: 'Frontend Engineer', company: 'Paperplane', location: 'Remote', type: 'Full time', mode: 'Remote', salary: '$110k–$145k', category: 'Technology', initials: 'PP', color: '#edf0ff', posted: 'Today', description: 'Build accessible interfaces with React and a thoughtful design system.' },
-  { id: 3, title: 'Growth Marketing Lead', company: 'Orbit Market', location: 'New York, US', type: 'Full time', mode: 'Hybrid', salary: '$90k–$115k', category: 'Marketing', initials: 'OM', color: '#fff0e7', posted: '3 days ago', description: 'Own creative growth experiments for a modern commerce platform.' },
-  { id: 4, title: 'People Operations Partner', company: 'Clover Health', location: 'Austin, US', type: 'Full time', mode: 'On-site', salary: '$82k–$105k', category: 'People', initials: 'CH', color: '#e9f7e8', posted: '4 days ago', description: 'Create a workplace where ambitious people can do their best work.' },
-  { id: 5, title: 'Product Manager, Mobile', company: 'Kite Finance', location: 'Toronto, CA', type: 'Full time', mode: 'Remote', salary: '$100k–$130k', category: 'Product', initials: 'KF', color: '#e8f5fb', posted: '5 days ago', description: 'Lead a small cross-functional team improving everyday finance.' },
-  { id: 6, title: 'Data Analyst', company: 'Kindred Energy', location: 'Berlin, DE', type: 'Contract', mode: 'Hybrid', salary: '$70k–$88k', category: 'Data', initials: 'KE', color: '#f4edff', posted: '1 week ago', description: 'Turn climate and customer data into clear operational decisions.' },
-]
+/** Persists / clears the JWT in localStorage. */
+export function setToken(token) {
+  if (token) localStorage.setItem(TOKEN_KEY, token);
+  else localStorage.removeItem(TOKEN_KEY);
+}
 
-export async function getJobs(query = '') {
-  try { return await api(`/jobs${query}`) }
-  catch {
-    const term = new URLSearchParams(query).get('search')?.toLowerCase()
-    return term ? demoJobs.filter(j => `${j.title} ${j.company} ${j.location}`.toLowerCase().includes(term)) : demoJobs
+/**
+ * Base API URL — env-driven so the same build works in dev / staging / prod.
+ * Override at build time:  VITE_API_URL=https://api.example.com/api vite build
+ */
+export const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:5087/api';
+
+/** Normalized error — every service consumer can rely on this shape. */
+export class ApiError extends Error {
+  constructor(message, { status = 0, detail = null, field = null } = {}) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.detail = detail;
+    this.field = field;
   }
 }
+
+/**
+ * Core request function. Wraps `fetch` with:
+ *   - absolute URL resolution against API_BASE_URL
+ *   - default JSON content type
+ *   - optional Bearer auth header
+ *   - normalized error throwing on non-2xx
+ *   - JSON parsing with empty-body fallback
+ *
+ * @param {string} path       Path relative to API_BASE_URL (e.g. '/account/login').
+ * @param {object} [options] fetch options; body may be a plain object.
+ * @param {boolean} [options.auth=true]   If true, attach Bearer token if present.
+ * @param {boolean} [options.raw=false]  If true, return raw Response instead of parsed body.
+ * @param {object}  [options.query]       Query params object — falsy values are skipped.
+ * @returns {Promise<any>}
+ */
+export async function api(path, options = {}) {
+  const {
+    auth = true,
+    raw = false,
+    query,
+    headers = {},
+    body,
+    ...rest
+  } = options;
+
+  const token = auth ? getToken() : null;
+  const finalHeaders = {
+    Accept: 'application/json',
+    ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...headers,
+  };
+
+  // Build the URL with optional query string.
+  const search = toQueryString(query);
+  const url = `${API_BASE_URL}${path}${search}`;
+
+  let response;
+  try {
+    response = await fetch(url, {
+      ...rest,
+      headers: finalHeaders,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+  } catch (networkErr) {
+    throw new ApiError('Cannot reach the server. Please check your connection.', {
+      status: 0,
+      detail: networkErr.message,
+    });
+  }
+
+  if (raw) return response;
+
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : null;
+
+  if (!response.ok) {
+    const message =
+      data?.detail ||
+      data?.message ||
+      data?.title ||
+      `Request failed with status ${response.status}`;
+    throw new ApiError(message, {
+      status: response.status,
+      detail: data?.detail || data,
+    });
+  }
+
+  return data;
+}
+
+/**
+ * Convert a flat object of query params into a URL-encoded query string.
+ *   - Falsy values (null, undefined, '', false) are skipped.
+ *   - Booleans are emitted as 'true' / 'false'.
+ *   - Returns '' if no params (no leading ?).
+ */
+function toQueryString(params) {
+  if (!params || typeof params !== 'object') return '';
+  const entries = Object.entries(params)
+    .filter(([, v]) => v !== null && v !== undefined && v !== '' && v !== false)
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`);
+  return entries.length ? `?${entries.join('&')}` : '';
+}
+
+/** Convenience verbs — keep call sites readable: api.get(...), api.post(...), ... */
+api.get = (path, options = {}) => api(path, { ...options, method: 'GET' });
+api.post = (path, body, options = {}) =>
+  api(path, { ...options, method: 'POST', body });
+api.put = (path, body, options = {}) =>
+  api(path, { ...options, method: 'PUT', body });
+api.patch = (path, body, options = {}) =>
+  api(path, { ...options, method: 'PATCH', body });
+api.delete = (path, options = {}) =>
+  api(path, { ...options, method: 'DELETE' });
+
+export default api;
