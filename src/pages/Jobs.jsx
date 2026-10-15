@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Filter, MapPin, Search, SlidersHorizontal, X } from 'lucide-react';
 import JobCard from '../components/JobCard';
-import { getExternalJobs, searchJobs } from '../services/jobsService';
-import { mapPagedJobs, toJobCardProps } from '../utils/jobPresentation';
+import { getJobsWithFallback, searchJobs } from '../services/jobsService';
+import { mapPagedJobs } from '../utils/jobPresentation';
 import { useAuth } from '../hooks/useAuth';
 
 const PAGE_SIZE = 20;
@@ -35,12 +35,19 @@ export default function Jobs() {
     setError('');
     try {
       const params = { search, location, remote, page: 1, pageSize: PAGE_SIZE };
+      // Use the fallback fetcher: tries external (Arbeitnow) first, then DB cache.
+      // This way, if Arbeitnow is slow/blocked/unreachable, the user still sees
+      // jobs from the local DB (after a sync has been run).
       const paged = source === 'cache'
         ? await searchJobs(params)
-        : await getExternalJobs(params);
+        : await getJobsWithFallback(params);
       const mapped = mapPagedJobs(paged);
       setJobs(mapped.items);
       setTotalItems(mapped.totalItems);
+      // If we fell back to cache, show a notice
+      if (paged.source === 'cache' && paged.fallbackReason) {
+        setError(`Live jobs temporarily unavailable (${paged.fallbackReason}). Showing cached jobs instead.`);
+      }
     } catch (err) {
       setError(err.message || 'Failed to load jobs.');
       setJobs([]);

@@ -42,4 +42,30 @@ export function syncJobs(maxPages = 3) {
   return api.post(`${ENDPOINTS.jobsSync}?maxPages=${maxPages}`, {});
 }
 
-export default { getExternalJobs, searchJobs, getJobById, syncJobs };
+/**
+ * Best-effort job fetcher — tries the external provider first,
+ * and falls back to the local DB cache if the external provider
+ * is unreachable (network/CORS/rate limit/timeout).
+ *
+ * @param {{ search?, location?, remote?, page?, pageSize? }} params
+ * @returns {Promise<{ items, page, pageSize, totalItems, totalPages, source }>}
+ */
+export async function getJobsWithFallback(params = {}) {
+  try {
+    const external = await getExternalJobs(params);
+    return { ...external, source: 'external' };
+  } catch (externalErr) {
+    // External failed — try the local DB cache as a fallback.
+    try {
+      const cached = await searchJobs(params);
+      return { ...cached, source: 'cache', fallbackReason: externalErr.message };
+    } catch (cacheErr) {
+      // Both failed — re-throw the original external error so the UI shows
+      // the more useful message (which includes the attempted URL).
+      throw externalErr;
+    }
+  }
+}
+
+export default { getExternalJobs, searchJobs, getJobById, syncJobs, getJobsWithFallback };
+

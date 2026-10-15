@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getExternalJobs } from '../services/jobsService';
+import { getJobsWithFallback } from '../services/jobsService';
 import { mapPagedJobs } from '../utils/jobPresentation';
 import JobCard from '../components/JobCard';
 import {
@@ -19,7 +19,7 @@ export default function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getExternalJobs({ page: 1, pageSize: 4 })
+    getJobsWithFallback({ page: 1, pageSize: 4 })
       .then((paged) => setJobs(mapPagedJobs(paged).items))
       .catch(() => setJobs([]));
   }, []);

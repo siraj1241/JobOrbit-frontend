@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, BriefcaseBusiness, CheckCircle2, Clock3, RefreshCw, Search, Zap } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { getExternalJobs, syncJobs } from '../services/jobsService';
+import { getJobsWithFallback, syncJobs } from '../services/jobsService';
 import { mapPagedJobs } from '../utils/jobPresentation';
 import JobCard from '../components/JobCard';
 import { ApiError } from '../lib/api';
@@ -28,7 +28,7 @@ export default function Dashboard() {
   // Load latest external jobs to show as "Fresh matches".
   const loadJobs = useCallback(async () => {
     try {
-      const paged = await getExternalJobs({ page: 1, pageSize: 3 });
+      const paged = await getJobsWithFallback({ page: 1, pageSize: 3 });
       setJobs(mapPagedJobs(paged).items);
     } catch {
       setJobs([]);
