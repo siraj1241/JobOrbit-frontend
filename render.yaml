@@ -4,8 +4,7 @@
 #  Usage:
 #    1. Push this repo to GitHub.
 #    2. In Render Dashboard → New → Blueprint → pick this file.
-#    3. Set VITE_API_URL to your deployed backend URL
-#       (e.g. https://joborbit-api.onrender.com/api).
+#    3. VITE_API_URL is pre-set to the deployed backend URL.
 #
 #  This deploys a Dockerized nginx static-site that serves the Vite-built
 #  bundle with runtime env-var injection for VITE_API_URL.
@@ -21,4 +20,4 @@ services:
     autoDeploy: true
     envVars:
       - key: VITE_API_URL
-        sync: false        # set in dashboard — e.g. https://joborbit-api.onrender.com/api
+        value: https://joborbit-backend-5.onrender.com/api
