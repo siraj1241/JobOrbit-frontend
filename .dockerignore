@@ -1,0 +1,32 @@
+# ─── Build artifacts ─────────────────────────────
+dist/
+dist-ssr/
+node_modules/
+.vite/
+
+# ─── IDE / editor ────────────────────────────────
+.vs/
+.vscode/
+.idea/
+*.swp
+*.log
+
+# ─── Source control ─────────────────────────────
+.git/
+.gitignore
+.gitattributes
+
+# ─── Docker ──────────────────────────────────────
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# ─── Env files (keep .env.example tracked; ignore locals) ───
+.env
+.env.local
+.env.*.local
+
+# ─── Docs ────────────────────────────────────────
+*.md
+LICENSE
+README.md

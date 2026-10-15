@@ -1,0 +1,24 @@
+# ─────────────────────────────────────────────────────────────────────
+#  Render Blueprint — JobOrbit Frontend (Vite + nginx)
+#
+#  Usage:
+#    1. Push this repo to GitHub.
+#    2. In Render Dashboard → New → Blueprint → pick this file.
+#    3. Set VITE_API_URL to your deployed backend URL
+#       (e.g. https://joborbit-api.onrender.com/api).
+#
+#  This deploys a Dockerized nginx static-site that serves the Vite-built
+#  bundle with runtime env-var injection for VITE_API_URL.
+# ─────────────────────────────────────────────────────────────────────
+
+services:
+  - type: web
+    name: joborbit-web
+    env: docker
+    region: oregon
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: VITE_API_URL
+        sync: false        # set in dashboard — e.g. https://joborbit-api.onrender.com/api

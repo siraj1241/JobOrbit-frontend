@@ -96,3 +96,54 @@ npm run preview  # preview the production build
 - Vite 6
 - React Router 7
 - lucide-react (icons)
+
+---
+
+## 🐳 Docker & Deploy to Render
+
+### Build & run locally with Docker
+
+```bash
+docker build -t joborbit-web .
+docker run -p 3000:80 \
+  -e VITE_API_URL=http://localhost:5087/api \
+  joborbit-web
+```
+
+The container listens on port **80** internally. Render maps its host port to 80.
+
+### How runtime env vars work
+
+Vite bakes `VITE_*` env vars into the bundle at **build time**, but Render injects env vars at **runtime**. We solve this with a 2-step pattern:
+
+1. **At build time:** the Dockerfile builds with `VITE_API_URL="__VITE_API_URL_PLACEHOLDER__"`. The placeholder ends up in the minified JS bundle.
+2. **At runtime:** `docker-entrypoint.sh` runs before nginx starts, replaces every occurrence of `__VITE_API_URL_PLACEHOLDER__` with the actual `$VITE_API_URL` env var (set by Render), then execs nginx.
+
+This means **the same Docker image works in any environment** — staging, production, preview — without rebuilds.
+
+### One-click Deploy to Render (Blueprint)
+
+1. Push this repo to GitHub.
+2. In Render Dashboard → **New → Blueprint** → pick the repo.
+3. Set `VITE_API_URL` to your deployed backend URL, e.g. `https://joborbit-api.onrender.com/api`.
+
+### Manual Deploy to Render (without Blueprint)
+
+1. **New → Web Service** → pick the GitHub repo.
+2. **Environment:** Docker.
+3. **Dockerfile path:** `./Dockerfile`.
+4. **Environment variables:**
+   | Key | Value |
+   |---|---|
+   | `VITE_API_URL` | `https://your-backend.onrender.com/api` |
+
+5. Render builds the image, runs `docker-entrypoint.sh` at startup which injects `VITE_API_URL` into the bundle, and serves the static files via nginx.
+
+### Full stack with docker-compose
+
+```bash
+# from the parent dir that contains both repos
+docker compose up --build
+```
+
+Frontend: http://localhost:3000, Backend: http://localhost:5087, Postgres: localhost:5432.

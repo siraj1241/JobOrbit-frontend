@@ -28,6 +28,11 @@ export function setToken(token) {
 
 /**
  * Base API URL — env-driven so the same build works in dev / staging / prod.
+ *
+ * At build time, Vite inlines `import.meta.env.VITE_API_URL` into the bundle.
+ * At runtime (in Docker), the docker-entrypoint.sh script substitutes the
+ * placeholder with the actual API URL from the container env vars.
+ *
  * Override at build time:  VITE_API_URL=https://api.example.com/api vite build
  */
 export const API_BASE_URL =
