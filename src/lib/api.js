@@ -29,14 +29,47 @@ export function setToken(token) {
 /**
  * Base API URL — env-driven so the same build works in dev / staging / prod.
  *
- * At build time, Vite inlines `import.meta.env.VITE_API_URL` into the bundle.
- * At runtime (in Docker), the docker-entrypoint.sh script substitutes the
- * placeholder with the actual API URL from the container env vars.
- *
- * Override at build time:  VITE_API_URL=https://api.example.com/api vite build
+ * Resolution order (first wins):
+ *   1. Real VITE_API_URL value baked at build time (no placeholder)
+ *   2. Runtime placeholder substituted by docker-entrypoint.sh
+ *   3. Derived from the current page hostname when running on Render
+ *      (https://joborbit-frontend-X.onrender.com → https://joborbit-backend-5.onrender.com/api)
+ *   4. Local dev fallback (http://localhost:5087/api)
  */
-export const API_BASE_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:5087/api';
+const RAW_VITE_API_URL = import.meta.env.VITE_API_URL;
+
+function resolveApiBaseUrl() {
+  // Case 1 & 2: real URL or substituted placeholder
+  if (RAW_VITE_API_URL
+      && RAW_VITE_API_URL !== '__VITE_API_URL_PLACEHOLDER__'
+      && RAW_VITE_API_URL.startsWith('http')) {
+    return RAW_VITE_API_URL;
+  }
+
+  // Case 3: derive from current page hostname when running on Render
+  // (covers the scenario where docker-entrypoint.sh didn't run or the
+  //  placeholder wasn't replaced for any reason)
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    const host = window.location.hostname;
+    if (host.endsWith('.onrender.com')) {
+      // The backend is deployed as a separate Render service.
+      // We can't auto-discover its exact URL, but we know the user has it
+      // wired up to joborbit-backend-5.onrender.com — use that as fallback.
+      return 'https://joborbit-backend-5.onrender.com/api';
+    }
+  }
+
+  // Case 4: local dev fallback
+  return 'http://localhost:5087/api';
+}
+
+export const API_BASE_URL = resolveApiBaseUrl();
+
+// Expose for debugging in the browser console: window.__API_BASE_URL__
+if (typeof window !== 'undefined') {
+  window.__API_BASE_URL__ = API_BASE_URL;
+  window.__RAW_VITE_API_URL__ = RAW_VITE_API_URL;
+}
 
 /** Normalized error — every service consumer can rely on this shape. */
 export class ApiError extends Error {
@@ -94,10 +127,14 @@ export async function api(path, options = {}) {
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch (networkErr) {
-    throw new ApiError('Cannot reach the server. Please check your connection.', {
-      status: 0,
-      detail: networkErr.message,
-    });
+    // Include the attempted URL + underlying error so the user can debug.
+    // (Otherwise "Cannot reach the server" is opaque — they can't tell if
+    //  the URL is wrong, the backend is down, or there's a CORS issue.)
+    throw new ApiError(
+      `Cannot reach server: ${url} — ${networkErr.message}. ` +
+      `(Resolved API_BASE_URL=${API_BASE_URL})`,
+      { status: 0, detail: networkErr.message }
+    );
   }
 
   if (raw) return response;
