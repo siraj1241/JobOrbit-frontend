@@ -8,6 +8,7 @@ import Jobs from './pages/Jobs';
 import Dashboard from './pages/Dashboard';
 import EmployerDashboard from './pages/EmployerDashboard';
 import ResumeBuilder from './pages/ResumeBuilder';
+import Debug from './pages/Debug';
 
 /** Guards a route — redirects anonymous users to /login. */
 function Protected({ children }) {
@@ -25,6 +26,7 @@ function Shell() {
           <Route path="/" element={<Home />} />
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/login" element={<Auth />} />
+          <Route path="/debug" element={<Debug />} />
           <Route
             path="/dashboard"
             element={
