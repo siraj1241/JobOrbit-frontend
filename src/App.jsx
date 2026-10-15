@@ -6,6 +6,8 @@ import Home from './pages/Home';
 import Auth from './pages/Auth';
 import Jobs from './pages/Jobs';
 import Dashboard from './pages/Dashboard';
+import EmployerDashboard from './pages/EmployerDashboard';
+import ResumeBuilder from './pages/ResumeBuilder';
 
 /** Guards a route — redirects anonymous users to /login. */
 function Protected({ children }) {
@@ -28,6 +30,22 @@ function Shell() {
             element={
               <Protected>
                 <Dashboard />
+              </Protected>
+            }
+          />
+          <Route
+            path="/employer"
+            element={
+              <Protected>
+                <EmployerDashboard />
+              </Protected>
+            }
+          />
+          <Route
+            path="/resume"
+            element={
+              <Protected>
+                <ResumeBuilder />
               </Protected>
             }
           />

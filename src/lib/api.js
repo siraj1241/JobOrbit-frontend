@@ -101,6 +101,10 @@ export async function api(path, options = {}) {
   const data = text ? JSON.parse(text) : null;
 
   if (!response.ok) {
+    // Allow callers to opt out of throwing on 404 (e.g. GET /resume which
+    // legitimately returns 404 when the user has no resume yet).
+    if (response.status === 404 && options.suppress404) return null;
+
     const message =
       data?.detail ||
       data?.message ||

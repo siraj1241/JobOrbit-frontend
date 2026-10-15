@@ -12,6 +12,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { setToken } from '../lib/api';
 import { STORAGE_KEYS } from '../lib/endpoints';
 import * as authService from '../services/authService';
+import * as employerService from '../services/employerService';
 
 const AuthContext = createContext(null);
 
@@ -45,7 +46,7 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
-  /** Login with email + password. Stores token + minimal user object. */
+  /** Login with email + password. */
   const login = useCallback(async ({ email, password }) => {
     const res = await authService.login({ email, password });
     setToken(res.accessToken);
@@ -58,7 +59,7 @@ export function AuthProvider({ children }) {
     return res;
   }, [persistUser]);
 
-  /** Register a new user. Stores token + minimal user object. */
+  /** Register a new user. */
   const register = useCallback(async ({ displayName, email, password, confirmPassword }) => {
     const res = await authService.register({
       displayName, email, password, confirmPassword,
@@ -73,19 +74,44 @@ export function AuthProvider({ children }) {
     return res;
   }, [persistUser]);
 
+  /**
+   * Upgrade the current user to Employer role. Returns the new JWT (auto-saved)
+   * so subsequent API calls carry the "Employer" role claim.
+   */
+  const upgradeToEmployer = useCallback(async (companyName) => {
+    const res = await employerService.upgradeToEmployer(companyName);
+    setToken(res.accessToken);
+    persistUser({
+      id: res.userId,
+      email: res.email,
+      displayName: res.displayName,
+      role: res.role,
+      companyName,
+    });
+    return res;
+  }, [persistUser]);
+
   const logout = useCallback(() => {
     clearSession();
   }, [clearSession]);
 
   const value = useMemo(
-    () => ({ user, loading, isAuthenticated: !!user, login, register, logout }),
-    [user, loading, login, register, logout]
+    () => ({
+      user,
+      loading,
+      isAuthenticated: !!user,
+      isEmployer: user?.role === 'Employer',
+      login,
+      register,
+      upgradeToEmployer,
+      logout,
+    }),
+    [user, loading, login, register, upgradeToEmployer, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-/** Read & validate the cached user object from localStorage. */
 function readUser() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.user);
@@ -95,7 +121,6 @@ function readUser() {
   }
 }
 
-/** Hook used by any component that needs auth state or actions. */
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>');

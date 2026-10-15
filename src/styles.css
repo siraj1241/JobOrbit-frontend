@@ -103,3 +103,49 @@ p { color: var(--muted); line-height: 1.65; }
 .source-toggle { width: 100%; padding: 10px 12px; border: 1px solid var(--line); background: white; border-radius: 9px; font-weight: 700; color: var(--teal-dark); cursor: pointer; }
 .source-toggle.active { background: var(--mint); border-color: #b7e9de; }
 .filter-hint { margin-top: 8px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+
+/* ─── Modal (employer job form) ─── */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(20,30,28,0.55); backdrop-filter: blur(3px); display: grid; place-items: center; padding: 20px; z-index: 50; }
+.modal-content { background: white; border-radius: 16px; padding: 28px; max-width: 720px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.modal-header h2 { margin: 0; font-size: 22px; }
+.icon-button { border: 0; background: none; cursor: pointer; padding: 6px; border-radius: 6px; }
+.icon-button:hover { background: #f1f5f4; }
+.job-form { display: grid; gap: 12px; }
+.job-form label { display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.job-form input, .job-form select, .job-form textarea {
+  padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; font-weight: 400; color: var(--ink); background: white;
+}
+.job-form input:focus, .job-form select:focus, .job-form textarea:focus { outline: 2px solid var(--mint); border-color: var(--teal); }
+.job-form textarea { font-family: inherit; resize: vertical; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+.checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--ink); }
+.checkbox-row input { width: 18px; height: 18px; accent-color: var(--teal); }
+.form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+.button-outline { background: transparent; color: var(--teal); border: 1px solid var(--teal); }
+.button-outline:hover { background: var(--mint); }
+.icon-button.danger { color: #c0392b; }
+
+/* ─── Card inset (resume builder sections) ─── */
+.card-inset { padding: 16px; border: 1px solid var(--line); border-radius: 10px; margin-bottom: 10px; background: #fafdfc; display: grid; gap: 8px; }
+.card-inset h4 { margin: 0; font-size: 14px; color: var(--teal-dark); }
+.card-inset input, .card-inset textarea { padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; font-size: 13px; }
+.skill-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.skill-row input { flex: 1; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; }
+.skills-list { display: grid; gap: 4px; margin-bottom: 8px; }
+
+/* ─── Header adjustments (more nav items) ─── */
+.header-actions .icon-link { display: flex; align-items: center; gap: 6px; color: var(--ink); font-size: 13px; font-weight: 600; text-decoration: none; padding: 6px 8px; border-radius: 6px; }
+.header-actions .icon-link:hover { background: var(--mint); color: var(--teal-dark); }
+.header-actions .icon-link svg { width: 16px; }
+
+/* ─── Status badges on employer table ─── */
+.status.published { color: #1b7369; background: #e6f7f3; }
+.status.draft { color: #7b5f16; background: #fff4d7; }
+.status.closed { color: #c0392b; background: #ffe9e6; }
+
+/* ─── Responsive: stack the resume builder columns on mobile ─── */
+@media (max-width: 900px) {
+  .form-row, .form-row.three { grid-template-columns: 1fr; }
+}

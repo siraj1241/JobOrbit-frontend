@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Bookmark, BriefcaseBusiness, ChevronDown, Menu, UserRound, X } from 'lucide-react';
+import { Bookmark, BriefcaseBusiness, ChevronDown, FileText, Menu, UserRound, X } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Header() {
   const [open, setOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, isEmployer, logout } = useAuth();
   const name = user?.displayName || user?.email || '';
 
   return (
@@ -26,13 +26,19 @@ export default function Header() {
         <div className="header-actions">
           {user ? (
             <>
-              <Link className="icon-link" to="/dashboard">
+              <Link className="icon-link" to="/resume" title="Build my resume">
+                <FileText size={18} /><span>Resume</span>
+              </Link>
+              <Link className="icon-link" to="/dashboard" title="My jobs">
                 <Bookmark size={18} /><span>My jobs</span>
+              </Link>
+              <Link className="icon-link" to="/employer" title="Employer dashboard">
+                <BriefcaseBusiness size={18} /><span>Employer</span>
               </Link>
               <div className="profile-chip">
                 <span>{name.charAt(0).toUpperCase()}</span>
                 <Link to="/dashboard">{name.split(' ')[0]}</Link>
-                <ChevronDown size={14} />
+                {isEmployer && <ChevronDown size={14} />}
               </div>
               <button className="text-button" onClick={logout}>Log out</button>
             </>
