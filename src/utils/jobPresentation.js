@@ -11,8 +11,8 @@
  */
 
 const PALETTE = [
-  '#dff4ef', '#edf0ff', '#fff0e7', '#e9f7e8',
-  '#e8f5fb', '#f4edff', '#ffe8f1', '#fffae0',
+  '#6366f1', '#8b5cf6', '#ec4899', '#f59e0b',
+  '#10b981', '#06b6d4', '#3b82f6', '#ef4444',
 ];
 
 /**

@@ -26,7 +26,7 @@ export default function JobCard({ job, onApply, compact = false }) {
   return (
     <article className={`job-card ${compact ? 'compact' : ''}`}>
       <div className="job-card-top">
-        <span className="company-logo" style={{ background: color }}>{initials}</span>
+        <span className="company-logo" style={{ background: color, color: 'white' }}>{initials}</span>
         <button className="save-button" aria-label="Save job"><Bookmark size={18} /></button>
       </div>
       <p className="eyebrow">{company}</p>
