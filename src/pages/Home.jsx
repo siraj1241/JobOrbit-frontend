@@ -16,12 +16,23 @@ const categories = [
 
 export default function Home() {
   const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
     getJobsWithFallback({ page: 1, pageSize: 4 })
-      .then((paged) => setJobs(mapPagedJobs(paged).items))
-      .catch(() => setJobs([]));
+      .then((paged) => {
+        if (!cancelled) setJobs(mapPagedJobs(paged).items);
+      })
+      .catch(() => {
+        if (!cancelled) setJobs([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, []);
 
   return (
@@ -81,9 +92,27 @@ export default function Home() {
             <button className="link-arrow" onClick={() => navigate('/jobs')}>Browse all jobs <ArrowRight size={17} /></button>
           </div>
           <div className="job-grid">
-            {jobs.length === 0
-              ? <p>Loading latest roles…</p>
-              : jobs.map((job) => <JobCard key={job.id} job={job} />)}
+            {loading
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="job-card skeleton-card">
+                    <div className="job-card-top">
+                      <div className="skeleton-logo" />
+                      <div className="skeleton-circle" />
+                    </div>
+                    <div className="skeleton-line short" />
+                    <div className="skeleton-line" />
+                    <div className="skeleton-line medium" />
+                    <div className="skeleton-tag-row">
+                      <div className="skeleton-tag" />
+                      <div className="skeleton-tag" />
+                    </div>
+                  </div>
+                ))
+              : jobs.length === 0
+                ? <p style={{ color: 'var(--muted)', padding: '40px 0', textAlign: 'center', gridColumn: '1 / -1' }}>
+                    No jobs available right now. The backend may be sleeping — try again in 30 seconds.
+                  </p>
+                : jobs.map((job) => <JobCard key={job.id} job={job} />)}
           </div>
         </div>
       </section>

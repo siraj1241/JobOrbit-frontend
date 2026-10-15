@@ -1067,3 +1067,40 @@ p { color: var(--muted); line-height: 1.65; }
 
 /* ─── Selection ─── */
 ::selection { background: var(--primary-100); color: var(--primary-dark); }
+
+/* ─── Skeleton loading states (shimmer animation) ─── */
+.skeleton-card {
+  pointer-events: none;
+  border: 1px solid var(--line);
+}
+.skeleton-logo, .skeleton-circle, .skeleton-line, .skeleton-tag {
+  background: linear-gradient(90deg, var(--line-soft) 25%, #e2e8f0 37%, var(--line-soft) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: 8px;
+}
+.skeleton-logo { width: 46px; height: 46px; border-radius: 12px; }
+.skeleton-circle { width: 34px; height: 34px; border-radius: 50%; margin-left: auto; }
+.skeleton-line { width: 100%; height: 14px; margin-top: 12px; }
+.skeleton-line.short { width: 50%; }
+.skeleton-line.medium { width: 70%; }
+.skeleton-tag-row { display: flex; gap: 6px; margin-top: 14px; }
+.skeleton-tag { width: 70px; height: 22px; border-radius: 6px; }
+@keyframes shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+/* ─── Backend sleeping notice ─── */
+.backend-notice {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 1px solid #fcd34d;
+  border-radius: 12px;
+  color: #92400e;
+  font-size: 13px;
+  font-weight: 600;
+}
+.backend-notice svg { flex-shrink: 0; }

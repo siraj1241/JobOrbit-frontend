@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Filter, MapPin, Search, SlidersHorizontal, X } from 'lucide-react';
+import { Filter, MapPin, Search, SlidersHorizontal, X, Clock } from 'lucide-react';
 import JobCard from '../components/JobCard';
 import { getJobsWithFallback, searchJobs } from '../services/jobsService';
 import { mapPagedJobs } from '../utils/jobPresentation';
@@ -29,10 +29,14 @@ export default function Jobs() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [totalItems, setTotalItems] = useState(0);
+  const [slowLoading, setSlowLoading] = useState(false);
 
   const fetchJobs = useCallback(async () => {
     setLoading(true);
     setError('');
+    setSlowLoading(false);
+    // After 5s of loading, show the "backend may be sleeping" notice
+    const slowTimer = setTimeout(() => setSlowLoading(true), 5000);
     try {
       const params = { search, location, remote, page: 1, pageSize: PAGE_SIZE };
       // Use the fallback fetcher: tries external (Arbeitnow) first, then DB cache.
@@ -53,6 +57,7 @@ export default function Jobs() {
       setJobs([]);
       setTotalItems(0);
     } finally {
+      clearTimeout(slowTimer);
       setLoading(false);
     }
   }, [search, location, remote, source]);
@@ -150,13 +155,45 @@ export default function Jobs() {
             </div>
           )}
 
+          {slowLoading && (
+            <div className="backend-notice">
+              <Clock size={18} />
+              <div>
+                <strong>Backend is waking up…</strong>
+                <p style={{ margin: 0, fontSize: 12, fontWeight: 500 }}>
+                  Render's free tier sleeps when idle — first request takes 30-60s. Subsequent requests will be fast.
+                </p>
+              </div>
+            </div>
+          )}
+
           {error && <div className="form-error">{error}</div>}
 
           <div className="jobs-list">
             {loading ? (
-              <p>Loading jobs…</p>
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="job-card compact skeleton-card">
+                  <div className="job-card-top">
+                    <div className="skeleton-logo" />
+                    <div className="skeleton-circle" />
+                  </div>
+                  <div className="skeleton-line short" />
+                  <div className="skeleton-line" />
+                  <div className="skeleton-line medium" />
+                  <div className="skeleton-tag-row">
+                    <div className="skeleton-tag" />
+                    <div className="skeleton-tag" />
+                  </div>
+                </div>
+              ))
             ) : jobs.length === 0 ? (
-              <p>No jobs found. Try a different search or switch sources.</p>
+              <p style={{ color: 'var(--muted)', padding: '40px 0', textAlign: 'center', gridColumn: '1 / -1' }}>
+                No jobs found. Try a different search or switch sources.
+                <br />
+                <button onClick={fetchJobs} className="button button-outline" style={{ marginTop: 16, padding: '8px 16px' }}>
+                  Retry
+                </button>
+              </p>
             ) : (
               jobs.map((job) => (
                 <JobCard key={job.id} job={job} onApply={handleApply} compact />
