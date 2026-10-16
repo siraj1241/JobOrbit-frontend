@@ -1,0 +1,54 @@
+.bigo-visualizer {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+  animation: fadeUp 0.5s ease;
+}
+.bigo-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; }
+.bigo-header h4 { margin: 0; font-size: 14px; color: var(--ink); }
+.bigo-legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; max-width: 480px; }
+.bigo-legend-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  transition: all .2s ease;
+  position: relative;
+}
+.bigo-legend-item.active {
+  background: var(--primary-50);
+  color: var(--ink);
+  font-weight: 700;
+}
+.bigo-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.bigo-label { font-family: monospace; font-weight: 600; }
+.bigo-badge {
+  font-size: 9px; padding: 1px 5px;
+  border-radius: 999px; color: white;
+  font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+}
+.bigo-badge.optimal { background: #10b981; }
+
+.bigo-svg { width: 100%; height: auto; display: block; }
+.bigo-curve-animated { animation: drawCurve 1.2s ease forwards; stroke-dasharray: 1; }
+.bigo-curve-static { stroke-dasharray: 1; stroke-dashoffset: 1; }
+
+@keyframes drawCurve {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bigo-explanation {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 13px;
+  color: var(--muted);
+}
+.bigo-explanation strong { font-weight: 700; }

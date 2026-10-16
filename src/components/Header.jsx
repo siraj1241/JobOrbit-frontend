@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bookmark, BriefcaseBusiness, ChevronDown, FileText, Menu, UserRound, X } from 'lucide-react';
+import { Bookmark, BriefcaseBusiness, ChevronDown, FileText, Menu, Sparkles, UserRound, X } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
@@ -20,6 +20,9 @@ export default function Header() {
         </button>
         <nav className={open ? 'nav open' : 'nav'}>
           <NavLink to="/jobs">Find jobs</NavLink>
+          <NavLink to="/practice" className="nav-practice">
+            <Sparkles size={14} /> Practice
+          </NavLink>
           <a href="/#companies">Companies</a>
           <a href="/#resources">Career resources</a>
         </nav>

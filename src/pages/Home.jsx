@@ -130,6 +130,39 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Practice CTA */}
+      <section className="section section-tint">
+        <div className="container">
+          <div className="practice-cta-banner">
+            <div className="practice-cta-content">
+              <p className="kicker"><Sparkles size={14} /> Sharpen your skills</p>
+              <h2>Practice coding puzzles<br />before the interview</h2>
+              <p>SQL puzzles with live checking, algorithm challenges with Big-O analysis, and quick MCQs to test your knowledge — all in your browser.</p>
+              <button className="button button-light" onClick={() => navigate('/practice')}>
+                Start practicing <ArrowRight size={18} />
+              </button>
+            </div>
+            <div className="practice-cta-visual">
+              <div className="practice-cta-card">
+                <div className="pcc-header">
+                  <span className="pcc-dot" /><span className="pcc-dot" /><span className="pcc-dot" />
+                </div>
+                <div className="pcc-body">
+                  <div className="pcc-line indigo" />
+                  <div className="pcc-line purple" />
+                  <div className="pcc-line pink" />
+                  <div className="pcc-line amber" />
+                  <div className="pcc-tag-row">
+                    <span className="pcc-tag">O(log n)</span>
+                    <span className="pcc-tag pass">✓</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="section company-section" id="companies">
         <div className="container company-feature">
           <div className="company-visual">
