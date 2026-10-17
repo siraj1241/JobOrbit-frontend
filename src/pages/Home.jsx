@@ -4,7 +4,7 @@ import { getJobsWithFallback } from '../services/jobsService';
 import { mapPagedJobs } from '../utils/jobPresentation';
 import JobCard from '../components/JobCard';
 import {
-  ArrowRight, BarChart3, BriefcaseBusiness, Building2, Code2, HeartHandshake,
+  ArrowRight, BarChart3, BriefcaseBusiness, Building2, Code2, FileText, HeartHandshake,
   Landmark, MapPin, Megaphone, Palette, Search, ShieldCheck, Sparkles, UsersRound,
 } from 'lucide-react';
 
@@ -81,6 +81,36 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="section section-tint showcase-section">
+        <div className="container">
+          <div className="showcase-row">
+            <div className="showcase-text">
+              <p className="kicker"><Sparkles size={14} /> Your career, in motion</p>
+              <h2>From first search<br />to first day</h2>
+              <p>JobOrbit brings together the jobs you want, the practice you need, and the resume that gets you noticed — all in one calm, focused workspace.</p>
+              <div className="showcase-features">
+                <div className="showcase-feature">
+                  <Search size={18} />
+                  <span><strong>Real jobs</strong> from Arbeitnow, TheMuse & more</span>
+                </div>
+                <div className="showcase-feature">
+                  <Code2 size={18} />
+                  <span><strong>Practice</strong> SQL, algorithms & quizzes</span>
+                </div>
+                <div className="showcase-feature">
+                  <FileText size={18} />
+                  <span><strong>Build resumes</strong> with AI bullet points</span>
+                </div>
+              </div>
+              <button className="button" onClick={() => navigate('/jobs')}>Start exploring <ArrowRight size={17} /></button>
+            </div>
+            <div className="showcase-visual">
+              <img src="/images/hero-illustration.png" alt="JobOrbit career illustration — diverse professionals finding their dream jobs" loading="lazy" />
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="section section-tint">
         <div className="container">
           <div className="section-heading">
@@ -109,9 +139,17 @@ export default function Home() {
                   </div>
                 ))
               : jobs.length === 0
-                ? <p style={{ color: 'var(--muted)', padding: '40px 0', textAlign: 'center', gridColumn: '1 / -1' }}>
-                    No jobs available right now. The backend may be sleeping — try again in 30 seconds.
-                  </p>
+                ? <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px 0' }}>
+                    <img
+                      src="/images/empty-jobs.png"
+                      alt="No jobs available right now"
+                      style={{ width: 200, height: 200, objectFit: 'contain', marginBottom: 16, opacity: 0.85 }}
+                      loading="lazy"
+                    />
+                    <p style={{ color: 'var(--muted)', fontSize: 14, maxWidth: 360, margin: '0 auto' }}>
+                      No jobs available right now. The backend may be sleeping — try again in 30 seconds.
+                    </p>
+                  </div>
                 : jobs.map((job) => <JobCard key={job.id} job={job} />)}
           </div>
         </div>

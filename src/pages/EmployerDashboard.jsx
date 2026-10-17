@@ -149,22 +149,20 @@ export default function EmployerDashboard() {
     return (
       <section className="dashboard">
         <div className="container">
-          <div className="dash-welcome">
-            <div>
+          <div className="upgrade-layout">
+            <div className="upgrade-text">
               <p className="kicker">Become an employer</p>
               <h1>Post jobs on JobOrbit</h1>
               <p>Upgrade your account to publish jobs directly to our community of seekers.</p>
-            </div>
-          </div>
 
-          {error && <div className="form-error">{error}</div>}
-          {notice && <div className="notice"><CheckCircle2 /> {notice}</div>}
+              {error && <div className="form-error">{error}</div>}
+              {notice && <div className="notice"><CheckCircle2 /> {notice}</div>}
 
-          <div className="application-panel" style={{ maxWidth: 560, marginTop: 30 }}>
-            <h2><Building2 size={20} /> Upgrade to Employer</h2>
-            <p>Tell us your company name. You can post jobs immediately after upgrading.</p>
-            <form onSubmit={handleUpgrade} className="auth-form" style={{ marginTop: 16 }}>
-              <label>
+              <div className="application-panel" style={{ marginTop: 30 }}>
+                <h2><Building2 size={20} /> Upgrade to Employer</h2>
+                <p>Tell us your company name. You can post jobs immediately after upgrading.</p>
+                <form onSubmit={handleUpgrade} className="auth-form" style={{ marginTop: 16 }}>
+                  <label>
                 Company name
                 <input
                   value={companyName}
@@ -177,6 +175,15 @@ export default function EmployerDashboard() {
                 {upgrading ? 'Upgrading…' : 'Upgrade my account'} <Rocket size={16} />
               </button>
             </form>
+          </div>
+            </div>
+            <div className="upgrade-visual">
+              <img
+                src="/images/employer-illustration.png"
+                alt="Employer illustration — post jobs and reach candidates"
+                loading="lazy"
+              />
+            </div>
           </div>
         </div>
       </section>

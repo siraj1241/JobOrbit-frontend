@@ -161,12 +161,18 @@ export default function ResumeBuilder() {
   return (
     <section className="dashboard">
       <div className="container">
-        <div className="dash-welcome">
-          <div>
+        <div className="resume-hero">
+          <div className="resume-hero-text">
             <p className="kicker">Resume builder</p>
             <h1>Build your resume</h1>
             <p>Keep one resume on file. Use AI to generate tailored bullet points for any role.</p>
           </div>
+          <img
+            src="/images/resume-illustration.png"
+            alt="Resume builder illustration — professional profile with skills and experience"
+            className="resume-hero-image"
+            loading="lazy"
+          />
         </div>
 
         {error && <div className="form-error">{error}</div>}

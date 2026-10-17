@@ -29,6 +29,12 @@ export default function Practice() {
             <p className="kicker kicker-light"><Sparkles size={14} /> Sharpen your skills</p>
             <h1>Practice. Analyze.<br /><em>Level up.</em></h1>
             <p>Solve real-world SQL puzzles, algorithms with live Big-O analysis, and quick quizzes — designed to feel smooth and rewarding.</p>
+            <img
+              src="/images/practice-illustration.png"
+              alt="Coding practice illustration — code editors and algorithm visualizations"
+              className="practice-hero-image"
+              loading="lazy"
+            />
           </div>
         </div>
 
